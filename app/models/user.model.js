@@ -12,7 +12,7 @@ const schema = mongoose.Schema(
 		questionaire: { type: mongoose.Schema.Types.ObjectId, ref: "Questionaire" },
 		caseHistory: { type: mongoose.Schema.Types.ObjectId, ref: "CaseHistory" },
 		journalEntries: [{ type: mongoose.Schema.Types.ObjectId, ref: "JournalEntry" }],
-		evaluationResults: [{ type: String }],
+		testResults: [{ type: mongoose.Schema.Types.ObjectId, ref: "TestResults" }],
 	},
 	{
 		timestamps: true,
