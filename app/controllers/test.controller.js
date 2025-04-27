@@ -18,7 +18,7 @@ module.exports = testController = {
 		await testResults.save();
 		user.testResults.push(testResults._id);
 		await user.save();
-		return res.status(201).json({ message: "Test results created successfully", user, testResults });
+		return res.status(201).json({ message: "Test results created successfully", testResults });
 	},
 
 	getResults: async (req, res) => {
