@@ -6,7 +6,7 @@ module.exports = testController = {
 	createResult: async (req, res) => {
 		const userId = req.user;
 
-		if (!req.body.anxiety || !req.body.stress || !req.body.insomnia || !req.body.depression || !req.body.selfEsteem) {
+		if (!req.body.anxiety || !req.body.stress || !req.body.insomnia || !req.body.depression || !req.body.selfEsteem || !req.body.score) {
 			return res.status(400).json({ message: "All fields are required" });
 		}
 

@@ -6,6 +6,7 @@ const testResultsSchema = new mongoose.Schema({
     insomnia: { type: Number, required: true },
     depression: { type: Number, required: true },
     selfEsteem: { type: Number, required: true },
+    score : { type: Number, required: true },
 });
 
 module.exports = mongoose.model('TestResults', testResultsSchema);

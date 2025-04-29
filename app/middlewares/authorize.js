@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
-    const token = req.headers["authorization"]; // Extract token from header
+    console.log(req.cookies);
+    const token = req.cookies.authToken; // Extract token from httpOnly cookie
     if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
     }

@@ -65,7 +65,14 @@ userController.registerUser = async (req, res) => {
         await newUser.save();
         
         // generate JWT token
-        const token = jwt.sign({_id : newUser._id}, process.env.JWT_SECRET, {expiresIn: '3d'});
+		const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+		
+		res.cookie("authToken", token, {
+			httpOnly: true, // Prevents JavaScript access to the cookie
+			secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+			sameSite: "strict", // Prevents CSRF attacks
+			maxAge: 24 * 60 * 60 * 1000, // Cookie expiration (1 day in this example)
+		});
 
 		res.status(201).send({
 			status: true,
@@ -110,7 +117,14 @@ userController.loginUser = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({_id : user._id}, process.env.JWT_SECRET, {expiresIn: '3d'});
+		const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+		
+		res.cookie("authToken", token, {
+			httpOnly: true, // Prevents JavaScript access to the cookie
+			secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+			sameSite: "strict", // Prevents CSRF attacks
+			maxAge: 24 * 60 * 60 * 1000, // Cookie expiration (1 day in this example)
+		});
 
 		res.status(200).send({
 			status: true,

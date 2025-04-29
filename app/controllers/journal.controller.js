@@ -20,7 +20,14 @@ module.exports = journalController = {
 				userId,
 			});
 
+			const user = await User.findById(userId);
+			if (!user) {
+				return res.status(404).json({ message: "User not found" });
+			}
 			await newJournal.save();
+			user.journalEntries.push(newJournal._id);
+			await user.save();
+
 			res.status(201).json(newJournal);
 		} catch (error) {
 			res.status(500).json({ message: "Error creating journal entry", error });
@@ -30,9 +37,13 @@ module.exports = journalController = {
 	getJournals: async (req, res) => {
 		try {
 			const journals = await Journal.find({ userId: req.user._id });
-			res.status(200).json(journals);
+			res.status(200).send({
+				status: "true",
+				data: journals,
+				message: "Journals fetched successfully",
+			});
 		} catch (error) {
-			res.status(500).json({ message: "Error fetching journals", error });
+			res.status(500).send({ status: "false", message: "Error fetching journals", error });
 		}
 	},
 };

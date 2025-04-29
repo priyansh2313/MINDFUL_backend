@@ -7,16 +7,26 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const Conversation = require("./app/models/coversation.model");
+const Message = require("./app/models/message.model");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const connectDb = require("./app/config/connectDb");
 connectDb();
 
-const corsOptions = {
-	origin: "*",
-	optionsSuccessStatus: 200,
-};
+// const corsOptions = {
+// 	origin: "*",
+// 	optionsSuccessStatus: 200,
+// };
 
-app.use(cors(corsOptions));
+app.use(
+	cors({
+		origin: ["http://localhost:5173", "https://your-frontend-on-render.com"],
+		credentials: true,
+	})
+);
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,6 +46,7 @@ const io = new Server(server, {
 	cors: {
 		origin: ["http://localhost:5173", "https://your-frontend-on-render.com"],
 		methods: ["GET", "POST"],
+		credentials: true, // Allow cookies to be sent
 	},
 });
 
@@ -44,6 +55,11 @@ const onlineUsers = {}; // { socket.id: { username, room } }
 
 io.on("connection", (socket) => {
 	console.log(`✅ A user connected: ${socket.id}`);
+
+	// Parse cookies manually for Socket.IO
+	const cookies = cookieParser.JSONCookies(
+		Object.fromEntries((socket.handshake.headers.cookie || "").split("; ").map((c) => c.split("=").map(decodeURIComponent)))
+	);
 
 	socket.on("userJoined", ({ username, room }) => {
 		socket.username = username;
@@ -69,8 +85,36 @@ io.on("connection", (socket) => {
 		}
 	});
 
-	socket.on("sendMessage", ({ username, message, room, fileUrl }) => {
-		io.to(room).emit("receiveMessage", { username, message, room, fileUrl });
+	socket.on("sendMessage", async ({ username, message, room, fileUrl }) => {
+		try {
+			const token = cookies.authToken;
+			const userId = jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+				return decoded;
+			});
+			console.log(userId);
+			// Find or create the single conversation
+			let conversation = await Conversation.findOne();
+			if (!conversation) {
+				conversation = new Conversation({ title: "General Chat" });
+				await conversation.save();
+			}
+
+			// Save the message to the database
+			const newMessage = new Message({
+				sender: userId,
+				conversation: conversation._id,
+				text: message,
+				fileUrl,
+			});
+			await newMessage.save();
+			conversation.messages.push(newMessage._id);
+			await conversation.save();
+			io.to(room).emit("receiveMessage", { senderId: userId, username, message, room, fileUrl });
+
+			console.log(`💾 Message saved: ${message}`);
+		} catch (error) {
+			console.error("Error saving message:", error);
+		}
 	});
 
 	socket.on("typing", ({ username, room }) => {
