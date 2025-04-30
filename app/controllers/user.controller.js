@@ -91,7 +91,7 @@ userController.registerUser = async (req, res) => {
 		res.cookie("authToken", token, {
 			httpOnly: true, // Prevents JavaScript access to the cookie
 			secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-			sameSite: "strict", // Prevents CSRF attacks
+			sameSite: "none", // Prevents CSRF attacks
 			maxAge: 24 * 60 * 60 * 1000, // Cookie expiration (1 day in this example)
 		});
 
@@ -143,7 +143,7 @@ userController.loginUser = async (req, res) => {
 		res.cookie("authToken", token, {
 			httpOnly: true, // Prevents JavaScript access to the cookie
 			secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-			sameSite: "strict", // Prevents CSRF attacks
+			sameSite: "none", // Prevents CSRF attacks
 			maxAge: 24 * 60 * 60 * 1000, // Cookie expiration (1 day in this example)
 		});
 
