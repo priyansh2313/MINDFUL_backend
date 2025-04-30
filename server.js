@@ -11,6 +11,7 @@ const Conversation = require("./app/models/coversation.model");
 const Message = require("./app/models/message.model");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const User = require("./app/models/user.model");
 
 const connectDb = require("./app/config/connectDb");
 connectDb();
@@ -61,7 +62,7 @@ io.on("connection", (socket) => {
 		Object.fromEntries((socket.handshake.headers.cookie || "").split("; ").map((c) => c.split("=").map(decodeURIComponent)))
 	);
 
-	socket.on("userJoined", ({ username, room }) => {
+	socket.on("userJoined", async ({ username, room }) => {
 		socket.username = username;
 		socket.room = room;
 		socket.join(room);
@@ -70,6 +71,17 @@ io.on("connection", (socket) => {
 
 		updateUsersInRoom(room);
 		console.log(`👤 ${username} joined room: ${room}`);
+		const conversation = await Conversation.findOne({ title: "General Chat" });
+		let messages = await Message.find({ conversation: conversation._id }).populate("sender").limit(20).exec();
+		messages = messages.map((message) => ({
+			id: message._id,
+			username: message.sender.anonymousUsername,
+			message: message.text,
+			fileUrl: message.fileUrl,
+			profilePicUrl: message.sender.profilePicUrl,
+			timestamp: message.createdAt,
+		}));
+		io.emit("previousMessages", {messages, room}); 
 	});
 
 	socket.on("joinRoom", (newRoom) => {
@@ -85,15 +97,13 @@ io.on("connection", (socket) => {
 		}
 	});
 
-	socket.on("sendMessage", async ({ username, message, room, fileUrl }) => {
+	socket.on("sendMessage", async ({ username, message, room, fileUrl, senderId }) => {
 		try {
-			const token = cookies.authToken;
-			const userId = jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-				return decoded;
-			});
+			const userId = senderId;
 			// Retrieve the user's anonymous username
-			const user = await User.findById(_id);
-			const anonymousUsername = user.anonymousUsername;
+			// const user = await User.findById(userId);
+			// const anonymousUsername = user.anonymousUsername;
+			const anonymousUsername = username;
 			// Find or create the single conversation
 			let conversation = await Conversation.findOne();
 			if (!conversation) {
