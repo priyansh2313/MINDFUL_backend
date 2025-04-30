@@ -2,6 +2,25 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken')
 
+const generateRandomUsername = async () => {
+	const adjectives = ["Mysterious", "Brave", "Silent", "Clever", "Witty", "Fierce"];
+	const nouns = ["Tiger", "Eagle", "Fox", "Wolf", "Bear", "Hawk"];
+	let username;
+
+	while (true) {
+		const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+		const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+		const randomNumber = Math.floor(100 + Math.random() * 900); // Random 3-digit number
+		username = `${randomAdjective}${randomNoun}${randomNumber}`;
+
+		// Check if the username is unique
+		const existingUser = await User.findOne({ anonymousUsername: username });
+		if (!existingUser) break; // Exit the loop if the username is unique
+	}
+
+	return username;
+};
+
 const userController = {};
 
 userController.registerUser = async (req, res) => {
@@ -53,12 +72,14 @@ userController.registerUser = async (req, res) => {
 				status: false,
 				message: "User already exists",
 			});
-        }
+		}
+		
+		const anonymousUsername = await generateRandomUsername();
         
         // encrypting password
 		const salt = await bcrypt.genSalt(10);
 		const hash = await bcrypt.hash(password, salt);
-		user = { ...req.body, password: hash };
+		user = { ...req.body, password: hash, anonymousUsername };
 
         // save new user
 		const newUser = new User(user);

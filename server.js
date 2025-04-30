@@ -91,7 +91,9 @@ io.on("connection", (socket) => {
 			const userId = jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
 				return decoded;
 			});
-			console.log(userId);
+			// Retrieve the user's anonymous username
+			const user = await User.findById(_id);
+			const anonymousUsername = user.anonymousUsername;
 			// Find or create the single conversation
 			let conversation = await Conversation.findOne();
 			if (!conversation) {
@@ -109,7 +111,7 @@ io.on("connection", (socket) => {
 			await newMessage.save();
 			conversation.messages.push(newMessage._id);
 			await conversation.save();
-			io.to(room).emit("receiveMessage", { senderId: userId, username, message, room, fileUrl });
+			io.to(room).emit("receiveMessage", { senderId: userId, username: anonymousUsername, message, room, fileUrl });
 
 			console.log(`💾 Message saved: ${message}`);
 		} catch (error) {

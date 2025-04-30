@@ -13,6 +13,7 @@ const schema = mongoose.Schema(
 		caseHistory: { type: mongoose.Schema.Types.ObjectId, ref: "CaseHistory" },
 		journalEntries: [{ type: mongoose.Schema.Types.ObjectId, ref: "JournalEntry" }],
 		testResults: [{ type: mongoose.Schema.Types.ObjectId, ref: "TestResults" }],
+		anonymousUsername: { type: String },
 	},
 	{
 		timestamps: true,
