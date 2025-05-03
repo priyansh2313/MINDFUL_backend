@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const testResultsSchema = new mongoose.Schema({
-    anxiety: { type: Number, required: true },
-    stress: { type: Number, required: true },
-    insomnia: { type: Number, required: true },
-    depression: { type: Number, required: true },
-    selfEsteem: { type: Number, required: true },
-    score : { type: Number, required: true },
+    anxiety: { type: String, required: true },
+    stress: { type: String, required: true },
+    insomnia: { type: String, required: true },
+    depression: { type: String, required: true },
+    selfEsteem: { type: String, required: true },
+    score : { type: String, required: true },
 });
 
 module.exports = mongoose.model('TestResults', testResultsSchema);

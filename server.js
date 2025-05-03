@@ -23,7 +23,7 @@ connectDb();
 
 app.use(
 	cors({
-		origin: ["http://localhost:5173", "https://your-frontend-on-render.com"],
+		origin: ["http://localhost:5173", "https://your-frontend-on-render.com", "*"],
 		credentials: true,
 	})
 );
@@ -45,7 +45,7 @@ routeFiles.forEach((routeFile) => {
 // --- Allow frontend (update with your deployed frontend URL) ---
 const io = new Server(server, {
 	cors: {
-		origin: ["http://localhost:5173", "https://your-frontend-on-render.com"],
+		origin: ["http://localhost:5173", "https://your-frontend-on-render.com", "*"],
 		methods: ["GET", "POST"],
 		credentials: true, // Allow cookies to be sent
 	},

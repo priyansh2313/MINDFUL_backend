@@ -5,8 +5,11 @@ const journalSchema = new mongoose.Schema({
 	content: { type: String, required: true },
 	date: { type: Date, default: Date.now },
 	userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-	tags: [{ type: String }],
-	mood: { type: String, enum: ["happy", "calm", "neutral", "anxious", "sad"], default: "neutral" },
+	mood: {
+		type: String,
+		enum: ["happy", "sad", "angry", "tired", "crying", "anxious", "lonely", "depressed", "empty", "guilty"],
+		default: "happy",
+	},
 });
 
 module.exports = mongoose.model('Journal', journalSchema);

@@ -1,6 +1,28 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require('crypto');
+
+const ALGORITHM = "aes-256-cbc";
+const IV_LENGTH = 16;
+
+const encrypt = (text, secret) => {
+	const iv = crypto.randomBytes(IV_LENGTH);
+	const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(secret, "hex"), iv);
+	let encrypted = cipher.update(text);
+	encrypted = Buffer.concat([encrypted, cipher.final()]);
+	return iv.toString("hex") + ":" + encrypted.toString("hex");
+};
+
+const decrypt = (encryptedText, secret) => {
+	const parts = encryptedText.split(":");
+	const iv = Buffer.from(parts.shift(), "hex");
+	const encrypted = Buffer.from(parts.join(":"), "hex");
+	const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(secret, "hex"), iv);
+	let decrypted = decipher.update(encrypted);
+	decrypted = Buffer.concat([decrypted, decipher.final()]);
+	return decrypted.toString();
+};
 
 const generateRandomUsername = async () => {
 	const adjectives = ["Mysterious", "Brave", "Silent", "Clever", "Witty", "Fierce"];
